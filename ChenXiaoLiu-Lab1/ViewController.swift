@@ -59,7 +59,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationManager.startUpdatingLocation()
         }
-        
         header.text = "My Shopping Calculator".localized()
         priceLabel.text = "Original Price".localized()
         discountLabel.text = "Discount".localized() + " %"
@@ -125,18 +124,20 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     @IBAction func originalPriceClearButtonPressed(_ sender: Any) {
-        originalPrice.text = ""
-        updateFinalPrice(originalPrice, 0, originalPriceError)
+        handleClear(originalPrice, 0, originalPriceError)
     }
     
     @IBAction func discountClearButtonPressed(_ sender: Any) {
-        discount.text = ""
-        updateFinalPrice(discount, 1, discountError)
+        handleClear(discount, 1, discountError)
     }
     
     @IBAction func taxClearButtonPressed(_ sender: Any) {
-        tax.text = ""
-        updateFinalPrice(tax, 2, taxError)
+        handleClear(tax, 2, taxError)
+    }
+    
+    private func handleClear(_ textField: UITextField,  _ index: Int, _ errorLabel: UILabel) {
+        textField.text = ""
+        updateFinalPrice(textField, 2, errorLabel)
     }
 }
 
