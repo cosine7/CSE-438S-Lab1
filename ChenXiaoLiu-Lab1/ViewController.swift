@@ -75,21 +75,24 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         geocoder.reverseGeocodeLocation(
             locations[0],
             completionHandler: { (placemarks, error) in
-                if error == nil {
-                    if let state = placemarks![0].administrativeArea {
-                        if let stateTax = self.taxes[state] {
-                            self.location.text = "Location".localized() + ": \(state)"
-                            self.tax.text = String(stateTax)
-                            self.updateFinalPrice(self.tax, 2, self.taxError)
-                            return
-                        }
-                    }
+                guard error == nil,
+                      let state = placemarks![0].administrativeArea,
+                      let stateTax = self.taxes[state]
+                else {
+                    self.updateLocationAndTax()
+                    return
                 }
-                self.location.text = "Location".localized() + ": " + "Outside the USA".localized()
-                self.tax.text = ""
-                self.updateFinalPrice(self.tax, 2, self.taxError)
+                self.updateLocationAndTax("Location".localized() + ": \(state)", String(stateTax))
             }
         )
+    }
+    
+    private func updateLocationAndTax(
+        _ locationText: String = "Location".localized() + ": " + "Outside the USA".localized(),
+        _ taxText: String = "") {
+        location.text = locationText
+        tax.text = taxText
+        updateFinalPrice(tax, 2, taxError)
     }
     
     @IBAction func originalPriceUpdated(_ sender: Any) {
@@ -104,21 +107,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         updateFinalPrice(tax, 2, taxError)
     }
     
-    func getInputOrDefault (_ str: String?) -> Double {
-        if str == "" {
-            return 0;
-        }
-        if let input = Double(str!) {
-            if input >= 0 {
-                return input
-            }
-        }
-        return -1
-    }
-    
     func updateFinalPrice (_ textField: UITextField, _ index: Int, _ errorLabel: UILabel) -> () {
-        let input = getInputOrDefault(textField.text)
-        if input != -1 {
+        let input = textField.text!.toDouble()
+        if input > 0 {
             errorLabel.text = ""
             values[index] = input
             finalPrice.text = String(
@@ -149,7 +140,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
 
 // Learned from https://www.youtube.com/watch?v=WSI_LS3Yq8I&t=611s
 extension String {
-    func localized () -> String {
+    func localized() -> String {
         return NSLocalizedString(
             self,
             tableName: "Localization",
@@ -157,5 +148,15 @@ extension String {
             value: self,
             comment: self
         )
+    }    
+    func toDouble() -> Double {
+        if self == "" {
+            return 0
+        }
+        var result = -1.0
+        if let input = Double(self) {
+            result = input
+        }
+        return result
     }
 }
