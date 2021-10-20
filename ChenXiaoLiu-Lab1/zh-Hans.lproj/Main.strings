@@ -1,0 +1,27 @@
+
+/* Class = "UILabel"; text = "My Shopping Calculator"; ObjectID = "01v-iE-dgJ"; */
+"01v-iE-dgJ.text" = "My Shopping Calculator";
+
+/* Class = "UILabel"; text = "Original Price"; ObjectID = "168-rD-QgY"; */
+"168-rD-QgY.text" = "Original Price";
+
+/* Class = "UILabel"; text = "-"; ObjectID = "4n2-kg-Qob"; */
+"4n2-kg-Qob.text" = "-";
+
+/* Class = "UIButton"; normalTitle = "Clear"; ObjectID = "8kq-Xl-pQa"; */
+"8kq-Xl-pQa.normalTitle" = "Clear";
+
+/* Class = "UIButton"; normalTitle = "Clear"; ObjectID = "Og5-4a-zd3"; */
+"Og5-4a-zd3.normalTitle" = "Clear";
+
+/* Class = "UILabel"; text = "Final Price"; ObjectID = "QDS-dm-BRD"; */
+"QDS-dm-BRD.text" = "Final Price";
+
+/* Class = "UIButton"; normalTitle = "Clear"; ObjectID = "j9D-Q4-I3T"; */
+"j9D-Q4-I3T.normalTitle" = "Clear";
+
+/* Class = "UILabel"; text = "Sales Tax %"; ObjectID = "lru-Lr-aEt"; */
+"lru-Lr-aEt.text" = "Sales Tax %";
+
+/* Class = "UILabel"; text = "Discount %"; ObjectID = "pAO-ah-axc"; */
+"pAO-ah-axc.text" = "Discount %";

@@ -1,0 +1,16 @@
+/* 
+  Localization.strings
+  ChenXiaoLiu-Lab1
+
+  Created by lcx on 2021/9/12.
+  
+*/
+"My Shopping Calculator" = "我的购物计算器";
+"Original Price" = "原价";
+"Discount" = "折扣";
+"Sales Tax" = "税";
+"Final Price" = "最终价格";
+"Clear" = "清除";
+"Invalid Input!" = "无效输入！";
+"Location" = "位置";
+"Outside the USA" = "美国外";
