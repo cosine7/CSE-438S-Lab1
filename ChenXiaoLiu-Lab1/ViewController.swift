@@ -108,18 +108,20 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func updateFinalPrice (_ textField: UITextField, _ index: Int, _ errorLabel: UILabel) -> () {
-        let input = textField.text!.toDouble()
-        if input > 0 {
-            errorLabel.text = ""
-            values[index] = input
-            finalPrice.text = String(
-                format: "%.2f",
-                values[0] * (100 - values[1]) / 100 * (1 + values[2] / 100)
-            )
-        } else {
+        guard let text = textField.text,
+              let input = text.toDouble(),
+              input > 0
+        else {
             errorLabel.text = "Invalid Input!".localized()
             finalPrice.text = "-"
+            return
         }
+        errorLabel.text = ""
+        values[index] = input
+        finalPrice.text = String(
+            format: "%.2f",
+            values[0] * (100 - values[1]) / 100 * (1 + values[2] / 100)
+        )
     }
     
     @IBAction func originalPriceClearButtonPressed(_ sender: Any) {
@@ -148,8 +150,8 @@ extension String {
             value: self,
             comment: self
         )
-    }    
-    func toDouble() -> Double {
+    }
+    func toDouble() -> Double? {
         if self == "" {
             return 0
         }
