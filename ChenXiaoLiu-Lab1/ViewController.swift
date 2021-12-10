@@ -9,6 +9,17 @@ import UIKit
 import CoreLocation
 import MapKit
 
+struct Pair {
+    let textField: UITextField
+    let error: UILabel
+}
+
+enum Input: String {
+    case originalPrice = "originalPrice"
+    case discount = "discount"
+    case tax = "tax"
+}
+
 class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var header: UILabel!
     @IBOutlet weak var originalPrice: UITextField!
@@ -29,12 +40,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     
     let locationManager = CLLocationManager()
     
-    var values = [0.0, 0.0, 0.0]
-    // values[0] = original price
-    // values[1] = discount
-    // values[2] = tax
-    
-    // Found at https://taxfoundation.org/2021-sales-taxes/
     let taxes = [
         "AL": 9.22, "AK": 1.76, "AZ": 8.4, "AR": 9.51, "CA": 8.68,
         "CO": 7.72, "CT": 6.35, "DE": 0, "FL": 7.08, "GA": 7.32,
@@ -49,11 +54,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         "DC": 6.00
     ]
     
+    private var item = [Input:Pair]()
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        item = [
+            .originalPrice: Pair(textField: originalPrice, error: originalPriceError),
+            .discount: Pair(textField: discount, error: discountError),
+            .tax: Pair(textField: tax, error: taxError)
+        ]
         self.locationManager.requestWhenInUseAuthorization()
-        
-        // Learned from https://stackoverflow.com/questions/25296691/get-users-current-location-coordinates
         if CLLocationManager.locationServicesEnabled() {
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
@@ -75,7 +85,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             locations[0],
             completionHandler: { (placemarks, error) in
                 guard error == nil,
-                      let state = placemarks![0].administrativeArea,
+                      let state = placemarks?[0].administrativeArea,
                       let stateTax = self.taxes[state]
                 else {
                     self.updateLocationAndTax()
@@ -88,56 +98,45 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     
     private func updateLocationAndTax(
         _ locationText: String = "Location".localized() + ": " + "Outside the USA".localized(),
-        _ taxText: String = "") {
+        _ taxText: String = ""
+    ) {
         location.text = locationText
         tax.text = taxText
-        updateFinalPrice(tax, 2, taxError)
+        textDidChange(tax)
     }
     
-    @IBAction func originalPriceUpdated(_ sender: Any) {
-        updateFinalPrice(originalPrice, 0, originalPriceError)
+    @IBAction func textDidChange(_ sender: UITextField) {
+        var isValidInput = true
+        for (key, value) in item {
+            if value.textField.hasText {
+                if !value.textField.isValid() {
+                    value.error.text = "Invalid Input!".localized()
+                    isValidInput = false
+                }
+            } else {
+                value.error.text = ""
+                if key == .originalPrice {
+                    isValidInput = false
+                }
+            }
+        }
+        finalPrice.text = isValidInput
+        ? String(
+            format: "%.2f",
+            originalPrice.toDouble() * (100 - discount.toDouble()) / 100 * (1 + tax.toDouble() / 100)
+        )
+        : "-"
     }
     
-    @IBAction func discountUpdated(_ sender: Any) {
-        updateFinalPrice(discount, 1, discountError)
-    }
-    
-    @IBAction func taxUpdated(_ sender: Any) {
-        updateFinalPrice(tax, 2, taxError)
-    }
-    
-    func updateFinalPrice (_ textField: UITextField, _ index: Int, _ errorLabel: UILabel) -> () {
-        guard let text = textField.text,
-              let input = text.toDouble(),
-              input > 0
+    @IBAction func clearButtonPressed(_ sender: UIButton) {
+        guard let id = sender.restorationIdentifier,
+              let key = Input(rawValue: id),
+              let item = self.item[key]
         else {
-            errorLabel.text = "Invalid Input!".localized()
-            finalPrice.text = "-"
             return
         }
-        errorLabel.text = ""
-        values[index] = input
-        finalPrice.text = String(
-            format: "%.2f",
-            values[0] * (100 - values[1]) / 100 * (1 + values[2] / 100)
-        )
-    }
-    
-    @IBAction func originalPriceClearButtonPressed(_ sender: Any) {
-        handleClear(originalPrice, 0, originalPriceError)
-    }
-    
-    @IBAction func discountClearButtonPressed(_ sender: Any) {
-        handleClear(discount, 1, discountError)
-    }
-    
-    @IBAction func taxClearButtonPressed(_ sender: Any) {
-        handleClear(tax, 2, taxError)
-    }
-    
-    private func handleClear(_ textField: UITextField,  _ index: Int, _ errorLabel: UILabel) {
-        textField.text = ""
-        updateFinalPrice(textField, 2, errorLabel)
+        item.textField.text = ""
+        textDidChange(item.textField)
     }
 }
 
@@ -152,14 +151,19 @@ extension String {
             comment: self
         )
     }
-    func toDouble() -> Double? {
-        if self == "" {
-            return 0
+}
+
+extension UITextField {
+    func toDouble() -> Double {
+        guard let text = self.text,
+              let num = Double(text)
+        else {
+            return -1
         }
-        var result = -1.0
-        if let input = Double(self) {
-            result = input
-        }
-        return result
+        return num
+    }
+    
+    func isValid() -> Bool {
+        return self.toDouble() > 0
     }
 }
